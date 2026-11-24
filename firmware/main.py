@@ -2,7 +2,7 @@
 # Direct port of Raspberry Pi logic
 # Copyright Jeffrey L. Goode
 
-VERSION = "2.24"
+VERSION = "2.25"
 
 print()
 print("Waterfall Controller")
@@ -26,7 +26,7 @@ water_level_pin = Pin(26, Pin.IN, Pin.PULL_UP)
 high_float_pin = Pin(25, Pin.IN, Pin.PULL_UP)
 low_float_pin = Pin(33, Pin.IN, Pin.PULL_UP)
 
-# Switches - the inputs are active low since the switch ON causes a logic 0 
+# Switches - the inputs are active low since the switch ON causes a logic 0
 
 # Top switch = Little Falls
 big_fall_pin = Pin(27, Pin.IN, Pin.PULL_UP)
@@ -72,11 +72,11 @@ while True:
         print("FAULT LATCHED")
         print("REASON:", fault_reason)
         print("Set BOTH switches OFF to clear")
-        #read switches
+        # read switches
         little_fall = (little_fall_pin.value() == 0)
         big_fall = (big_fall_pin.value() == 0)
         # until both switches are set to OFF, the fault will remain
-        
+
         if not little_fall and not big_fall:
             print("Fault cleared")
             fault_reason = ""
@@ -89,13 +89,12 @@ while True:
     # 0 = low water
     # 1 = water OK
     water_level = water_level_pin.value()
-    
+
     # new floats
     # low_level = 1 is good, that means low float sees water
     # high_level = 0 is good, that means high float does not see water, and that pond is not overflowing
     # if low_level = 0, this is actually catestrophic meaning the big pump is about to run dry
     # if high_level = 1, this means the pond has overflowed
-
 
     high_level = high_float_pin.value()
     low_level = low_float_pin.value()
@@ -107,14 +106,14 @@ while True:
     print("big pump is dry", big_pump_is_dry)
     print("pond has overflowed", pond_has_overflowed)
     print()
-    
+
     # Active LOW switches
     # 0 = switch ON
     # 1 = switch OFF
     # 0 = switch on causes the if equal 0 to be True
     little_fall = (little_fall_pin.value() == 0)
     big_fall = (big_fall_pin.value() == 0)
-    
+
     print("top switch (little falls)", little_fall)
     print("bottom switch (big falls)", big_fall)
     print("little_fall_pin value", little_fall_pin.value())
@@ -122,39 +121,35 @@ while True:
     print()
     print("little_fall_pin value", little_fall_pin.value())
     print("big_fall_pin value", big_fall_pin.value())
-    
+
     # -------------------------
     # Don't operate the waterfalls if the switches are not active
     # -------------------------
     if not little_fall and not big_fall:
-
         little_pump_pin.value(0)
         big_pump_pin.value(0)
         water_valve_pin.value(0)
 
         print("Both switches are OFF - system disarmed.")
- 
+
         time.sleep(1)
         continue
 
     # -------------------------
     # Turn off both pumps and water if the big pump is about to run dry
-    # Turn off both pumps and water if pond has overflowed 
+    # Turn off both pumps and water if pond has overflowed
     # -------------------------
     if big_pump_is_dry:
-        
         little_pump_pin.value(0)
         big_pump_pin.value(0)
-        water_valve_pin.value(0)
+        water_valve_pin.value(1)
 
-        fault_latched = True
-        print("FAULT: Big pump is about to run dry")
-        fault_reason = "BIG PUMP DRY"
-        time.sleep(1)
+        print("EMERGENCY REFILL  - LOw FLOAT DRY")
+        time.sleep(60)
         continue
 
     # -------------------------
-    # Turn off both pumps and water if pond has overflowed 
+    # Turn off both pumps and water if pond has overflowed
     # -------------------------
     if pond_has_overflowed:
         little_pump_pin.value(0)
@@ -207,18 +202,16 @@ while True:
     print("water level =", water_level)
     print("little fall switch =", little_fall)
     print("big fall switch =", big_fall)
-    
 
     print(
         "water valve =", water_valve_pin.value(),
         "little pump =", little_pump_pin.value(),
         "big pump =", big_pump_pin.value()
     )
-    
-
-
 
     print()
 
     time.sleep(1)
+
+
 
